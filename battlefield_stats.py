@@ -1,7 +1,7 @@
 # File: battlefield_stats.py 
 # Author: Jay Oliver
 # Date Created: 11/03/2020
-# Last Modified: 16/03/2020
+# Last Modified: 21/03/2020
 # Purpose: This script is a data visualization tool for the stats
 #          provided on the battlfield tracker website
 # Comments:
@@ -12,11 +12,11 @@ import requests
 import sys
 from battlefield import scrub
 
-parser = argparse.ArgumentParser(description="This is a script that "
-                                             "provides a visual "
-                                             "comparison of stats "
-                                             "provided on "
-                                             "battlefieldtracker.com")
+parser = argparse.ArgumentParser(description="This is a script that"
+                                             " provides a visual"
+                                             " comparison of stats"
+                                             " provided on"
+                                             " battlefieldtracker.com")
 
 parser.add_argument("platform",
                     help = "The platform that the user account is on.",
@@ -24,8 +24,8 @@ parser.add_argument("platform",
                     choices=["origin", "xbox", "psn"])
 
 parser.add_argument("prof_name",
-                    help = "the name of the battlefield account the "
-                           "stats are for.",
+                    help = "the name of the battlefield account the"
+                           " stats are for.",
                     type = str,
                     nargs = '+')
 
@@ -57,7 +57,6 @@ except requests.exceptions.RequestException as err:
     sys.exit(1)
 
 if (page.status_code != 200):
-    raise Exception ("Unknown Error: page status "
-                     "received was {}".format(page.status_code))
+    raise Exception ("Unknown Error: page status received was {}".format(page.status_code))
 
 weapon_stats = scrub.weaps(page)

@@ -1,17 +1,21 @@
 # File: scrub.py 
 # Author: Jay Oliver
 # Date Created: 13/03/2020
-# Last Modified: 17/03/2020
+# Last Modified: 21/03/2020
 # Purpose: This file contains all functions that relate to web page
 #          scrubbing
-# Comments: More than one scrubbing fuction maybe createdso as to
+# Comments: More than one scrubbing fuction maybe created so as to
 #           allow the scrubbing of different stats
 #
 
 from bs4 import BeautifulSoup
+from re import search
+
 
 def weaps(page):
-    """
+    """Scrub and return the stats present on battlefield tracker webpage.
+
+
         This function scrubs the weapons page of
         battlefieldtracker.com for the stats on all the listed weapons
         and returns them in a dictionary.
@@ -28,13 +32,19 @@ def weaps(page):
         raises:
 
     """
+    # these are entries that appear in the final parse (ret) that need
+    # to be removed
+    bad_ent = ["Search Profile", "Search", "Home", "My Profile",
+               "Leaderboards", "Challenges", "More", "Link Profile",
+               "Score/min", "K/D", "Rank", "Win %", "Kills",
+               "Kills/min", "Time Played", "Shots Fired", "Shots Hit",
+               "Shots Accuracy", "Headshots", "--"]
 
     soup = BeautifulSoup(page.content, "html.parser")
-    # this entry is one that will appear in the list that is parsed
-    # from the soup and it needs to be removed.
-    bad_ent = BeautifulSoup('<span class="sub" data-v-30f8f9f7="" data-v-7f5c8f78="">--</span>').span
-
-    parsed_soup = [str(i) for i in soup.select('span[data-v-30f8f9f7=""]') if i != bad_ent]
-    ret = [re.search(r">.*<", i).group(0)[1:-1] for i in parsed_soup]
+    parsed_soup = [str(i) for i in soup.find_all("span", ["name", "sub"])]
+    ret = [search(r">.*<", i).group(0)[1:-1]
+           for i
+           in parsed_soup
+           if search(r">.*<", i).group(0)[1:-1] not in bad_ent]
 
     return ret
