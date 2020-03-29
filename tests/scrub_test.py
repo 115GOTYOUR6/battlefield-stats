@@ -5,12 +5,12 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 
 from requests import get
+from pprint import pprint
 from battlefield import scrub
 
 
 url = "https://battlefieldtracker.com/bfv/profile/origin/115GOTYOUR6/weapons"
 page = get(url)
-weap_stats = scrub.weaps(page)
+weap_stats = scrub.weaps(page, "115GOTYOUR6")
 
-for i in weap_stats:
-    print(i)
+pprint(weap_stats)
