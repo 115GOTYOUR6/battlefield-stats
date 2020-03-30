@@ -11,6 +11,7 @@ from battlefield import scrub
 
 url = "https://battlefieldtracker.com/bfv/profile/origin/115GOTYOUR6/weapons"
 page = get(url)
-weap_stats = scrub.weaps(page, "115GOTYOUR6")
+weap_stats = scrub.weaps(page)
 
-pprint(weap_stats)
+for i in weap_stats:
+    print(i)
