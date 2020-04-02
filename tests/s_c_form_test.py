@@ -6,6 +6,22 @@ sys.path.insert(0,parentdir)
 
 from battlefield import plot
 from pprint import pprint
+import argparse
+
+parser = argparse.ArgumentParser(description="This is a test")
+
+parser.add_argument("test",
+                    help = "The scripts that need testing",
+                    type = str,
+                    choices = ["s_c_format", "s_c_plot"]
+                   )
+parser.add_argument("--stats2plot",
+                    help = "The stats to plot",
+                    type = str,
+                    nargs = "*"
+                   )
+
+args = parser.parse_args()
 
 x = ['Lewis Gun', 'LMG', '774', '1.49', '8h 41m 25s', '22,848', '4,478', '19.60',
  '174', 'StG 44', 'ASSAULT RIFLE', '751', '1.51', '8h 16m 10s', '21,171',
@@ -79,4 +95,8 @@ x = ['Lewis Gun', 'LMG', '774', '1.49', '8h 41m 25s', '22,848', '4,478', '19.60'
 'Lunge Mine', 'GADGET', '0', '0.00', '10s', '0', '0', '0.00', '0']
 
 s_c_dict = plot.s_c_form(x, "115GOTYOUR6")
-pprint(s_c_dict)
+if args.test == "s_c_format":
+    pprint(s_c_dict)
+
+elif args.test == "s_c_plot":
+    plot.s_c_plot(s_c_dict, "./tests/s_c_plot_pics", args.stats2plot)

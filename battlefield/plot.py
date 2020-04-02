@@ -1,7 +1,7 @@
 # File: plot.py
 # Author: Jay Oliver
 # Date Created: 29/03/2020
-# Last Modified: 30/03/2020
+# Last Modified: 2/04/2020
 # Purpose: Creates bar graphs displaying stats from the battlefield tracker
 #          website. Specifically the ouput of the scrub module in the
 #          battlefield package
@@ -27,8 +27,28 @@
 
 import matplotlib.pyplot as plt
 from re import sub
+from os import mkdir
 
 from battlefield import time_played
+
+def stat_units(stat):
+    """Returns the units for the provided stat.
+
+    parameters
+        - stat: The stat the units are wanted for.
+    return
+        - switcher.get: Gets the stat value from the dictionary switcher. Upon
+                        failing to retreive anything it returns an empty
+                        string.
+    raises:
+    """
+    switcher = {
+        "kpm": "(kills/min)",
+        "time played": "(hours)",
+        "accuracy": "(shots hit/shots fired)"
+    }
+    return switcher.get(stat, "")
+
 
 # s_c meaning stat class
 def s_c_form(data, prof):
@@ -160,21 +180,70 @@ def some_format(stats_list):
 
 
 
-def s_c_plot(stats_dict):
-    """Creates bar graphs from the data in the given dictionaries.
+def s_c_plot(stats_dict, dname, stats2plot=None):
+    """Creates bar graphs from the data in the given dictionary.
+
+    The data is that obtained from the s_c_format method in this module.
 
     parameters:
-        - some
+        - stats_dict: A dictionary containing the stats for weapons.
+        - dname:
+        - stats2plot: A list of strings indicating the stats that are to be
+                      plotted, if this parameter is not given all the
+                      available stats will be graphed.
     returns:
-        - some
     raises:
-        -
+        - ValueError: If the type of the optional parameter is not a list of
+                      strings or one of the stats given to be plotted is not
+                      in the data set this is raised.
     """
+    # search for the heighest values before making the plots as there is to
+    # many (potentially) to hold them in buffer, modify and then save   
+    if stats2plot != None:
+        if not isinstance(stats2plot, list):
+            raise ValueError("The optional parameter stats2plot is not a"
+                             "list."
+                            )
+        for i in stats2plot:
+            if not isinstance(i, str):
+                raise ValueError("One or more of the elements of the"
+                                 " optional list stats2plot is not a string."
+                                )
+
+    try:
+        mkdir(dname)
+    except FileExistsError:
+        pass
+
     for prof in stats_dict.keys():
-        for stat in stats_dict[prof].keys():
+        if stats2plot == None:
+            stats2plot = stats_dict[prof].keys()
+        else:
+            for i in stats2plot:
+                if i not in stats_dict[prof].keys():
+                    raise ValueError("One of the specified stats to plot is"
+                                     " not present in the weapon stats for"
+                                     " {}".format(prof))
+        try:
+            mkdir("{}/{}".format(dname, prof))
+        except FileExistsError:
+            pass
+        for stat in stats2plot:
+            try:
+                mkdir("{}/{}/{}".format(dname, prof, stat))
+            except FileExistsError:
+                pass
             for w_class in stats_dict[prof][stat].keys():
-                plt.figure(figsize = (1200, 800), facecolor = 'w')
-                weap_dict = stats_dict[prof][stats][w_class]
+                fig = plt.figure(figsize = (23, 14), facecolor = 'w')
+                weap_dict = stats_dict[prof][stat][w_class]
                 plt.bar([i for i in range(len(weap_dict.keys()))],
                         [weap_dict[j] for j in weap_dict.keys()],
                         tick_label = [k for k in weap_dict.keys()])
+                plt.suptitle("{} {} for {}S".format(prof, stat, w_class),
+                            fontsize = 16)
+                plt.ylabel("{} {}".format(stat, stat_units(stat)))
+                plt.savefig("{}/{}/{}/{} {} for {}S"
+                           ".png".format(dname, prof, stat, prof, stat,
+                                         w_class),
+                           bbox_inches = "tight")
+                plt.close(fig=None)

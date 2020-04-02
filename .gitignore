@@ -1,7 +1,7 @@
 *.pyc
 *.pyo
-__pycache__/
-env/
+__pycache__
+bs_env/
 
 # Distribution / packaging
 bin/

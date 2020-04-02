@@ -31,13 +31,13 @@ parser.add_argument("prof_name",
 
 args = parser.parse_args()
 
-prof_name = " ".join(args.prof_name)
+args.prof_name = " ".join(args.prof_name)
 
 url = ("https://battlefieldtracker.com/bfv/profile/{plat}/{prof}"
-       "/weapons".format(plat = args.platform, prof = prof_name))
+       "/weapons".format(plat = args.platform, prof = args.prof_name))
 
 # the url is not expected to change so an option to specify it will not
-# be provided
+# be provided (its dice/EA we're taling bout here)
 try:
     page = requests.get(url)
 except requests.exceptions.HTTPError as errh:
