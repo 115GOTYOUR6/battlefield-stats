@@ -95,6 +95,7 @@ x = ['Lewis Gun', 'LMG', '774', '1.49', '8h 41m 25s', '22,848', '4,478', '19.60'
 'Lunge Mine', 'GADGET', '0', '0.00', '10s', '0', '0', '0.00', '0']
 
 s_c_dict = plot.s_c_form(x, "115GOTYOUR6")
+plot.s_c_add_hpk(s_c_dict)
 if args.test == "s_c_format":
     pprint(s_c_dict)
 

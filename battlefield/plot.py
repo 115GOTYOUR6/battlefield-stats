@@ -1,7 +1,7 @@
 # File: plot.py
 # Author: Jay Oliver
 # Date Created: 29/03/2020
-# Last Modified: 2/04/2020
+# Last Modified: 3/04/2020
 # Purpose: Creates bar graphs displaying stats from the battlefield tracker
 #          website. Specifically the ouput of the scrub module in the
 #          battlefield package
@@ -24,6 +24,13 @@
 #           169         # headshots
 #           ...next weapon
 #
+#           s_c_dict or stats class dictionary format is:
+#           |prof
+#           -|stat
+#           --|weapon class
+#           ---|weapon name
+#           ----|value
+#
 
 import matplotlib.pyplot as plt
 from re import sub
@@ -45,9 +52,34 @@ def stat_units(stat):
     switcher = {
         "kpm": "(kills/min)",
         "time played": "(hours)",
-        "accuracy": "(shots hit/shots fired)"
+        "accuracy": "(shots hit/shots fired)",
+        "hpk": "(headshot percentage)"
     }
     return switcher.get(stat, "")
+
+def s_c_limits(stats_dict, prof, stat):
+    """Returns the highest and lowest values found in the s_c_dict provided.
+
+    parameter:
+        - stats_dict: The s_c_dict the min max values are wanted from
+        - prof: The profile name the values are to be taken from as a string
+        - stat: The stat the values are to be taken from as a string
+    returns:
+        - s_min: The smallest value among those for a particular stat and
+                 weapon class provided
+        - s_max: The largest value ""
+    raises:
+    """
+    s_min = 0
+    s_max = 0
+    for w_class in stats_dict[prof][stat].keys():
+        for weap in stats_dict[prof][stat][w_class].keys():
+            if stats_dict[prof][stat][w_class][weap] > s_max:
+                s_max = stats_dict[prof][stat][w_class][weap]
+            if stats_dict[prof][stat][w_class][weap] < s_min:
+                s_min = stats_dict[prof][stat][w_class][weap]
+
+    return s_min, s_max
 
 
 # s_c meaning stat class
@@ -120,6 +152,58 @@ def s_c_form(data, prof):
                                  " expected.")
 
     return s_c_dict
+
+def s_c_add_hpk(stats_dict):
+    """Add headshots per kill stat to given s_c dict.
+
+    parameters:
+        -stats_dict: The s_c dict to store the stat calculations to
+    returns:
+
+    raises:
+        - ValueError: Various empty stats_dict keys that should have keys
+                      present or stats that don't have the same weapon class
+                      or weapons present
+    """
+    for prof in stats_dict.keys():
+        if ("headshots" not in stats_dict[prof].keys()
+            or "kills" not in stats_dict[prof].keys()):
+            raise ValueError("The kills or headshots stats are not present")
+        if len(stats_dict[prof]["headshots"].keys()) == 0:
+            raise ValueError("There are no weapon classes present in the"
+                             " headshots stat"
+                            )
+        if (stats_dict[prof]["headshots"].keys()
+            != stats_dict[prof]["kills"].keys()):
+            raise ValueError("headshots and kills do not have the"
+                            " same weapon classes present in the"
+                            " dictionary"
+                            )
+        stats_dict[prof]["hpk"] = {}
+
+        for w_class in stats_dict[prof]["headshots"].keys():
+            if len(stats_dict[prof]["headshots"][w_class].keys()) == 0:
+                del(stats_dict[prof]["hpk"])
+                raise ValueError("There are no weapons in the {} class for"
+                                 " headshots"
+                                 .format(w_class)
+                                )
+            if (stats_dict[prof]["headshots"][w_class].keys()
+                != stats_dict[prof]["kills"][w_class].keys()):
+                    del(stats_dict[prof]["hpk"])
+                    raise ValueError("heashots and kills do not have the same"
+                                    " weapons present in the dictionary"
+                                    )
+            stats_dict[prof]["hpk"][w_class] = {}
+
+            for weap in stats_dict[prof]["headshots"][w_class].keys():
+                try:
+                    stats_dict[prof]["hpk"][w_class][weap] = (
+                        stats_dict[prof]["headshots"][w_class][weap]
+                        /stats_dict[prof]["kills"][w_class][weap]*100.0
+                    )
+                except ZeroDivisionError:
+                    stats_dict[prof]["hpk"][w_class][weap] = 0
 
 
 def some_format(stats_list):
@@ -197,8 +281,6 @@ def s_c_plot(stats_dict, dname, stats2plot=None):
                       strings or one of the stats given to be plotted is not
                       in the data set this is raised.
     """
-    # search for the heighest values before making the plots as there is to
-    # many (potentially) to hold them in buffer, modify and then save   
     if stats2plot != None:
         if not isinstance(stats2plot, list):
             raise ValueError("The optional parameter stats2plot is not a"
@@ -209,11 +291,11 @@ def s_c_plot(stats_dict, dname, stats2plot=None):
                 raise ValueError("One or more of the elements of the"
                                  " optional list stats2plot is not a string."
                                 )
-
     try:
         mkdir(dname)
     except FileExistsError:
         pass
+
 
     for prof in stats_dict.keys():
         if stats2plot == None:
@@ -223,7 +305,8 @@ def s_c_plot(stats_dict, dname, stats2plot=None):
                 if i not in stats_dict[prof].keys():
                     raise ValueError("One of the specified stats to plot is"
                                      " not present in the weapon stats for"
-                                     " {}".format(prof))
+                                     " {}".format(prof)
+                                    )
         try:
             mkdir("{}/{}".format(dname, prof))
         except FileExistsError:
@@ -233,17 +316,22 @@ def s_c_plot(stats_dict, dname, stats2plot=None):
                 mkdir("{}/{}/{}".format(dname, prof, stat))
             except FileExistsError:
                 pass
+            y_min, y_max = s_c_limits(stats_dict, prof, stat)
             for w_class in stats_dict[prof][stat].keys():
                 fig = plt.figure(figsize = (23, 14), facecolor = 'w')
                 weap_dict = stats_dict[prof][stat][w_class]
                 plt.bar([i for i in range(len(weap_dict.keys()))],
                         [weap_dict[j] for j in weap_dict.keys()],
-                        tick_label = [k for k in weap_dict.keys()])
+                        tick_label = [k for k in weap_dict.keys()]
+                       )
                 plt.suptitle("{} {} for {}S".format(prof, stat, w_class),
-                            fontsize = 16)
+                            fontsize = 16
+                            )
                 plt.ylabel("{} {}".format(stat, stat_units(stat)))
+                plt.ylim(y_min, y_max)
                 plt.savefig("{}/{}/{}/{} {} for {}S"
                            ".png".format(dname, prof, stat, prof, stat,
                                          w_class),
-                           bbox_inches = "tight")
+                           bbox_inches = "tight"
+                           )
                 plt.close(fig=None)
