@@ -100,4 +100,4 @@ if args.test == "s_c_format":
     pprint(s_c_dict)
 
 elif args.test == "s_c_plot":
-    plot.s_c_plot(s_c_dict, "./tests/s_c_plot_pics", args.stats2plot)
+    plot.s_c_plot(s_c_dict, "./tests/s_c_plot_pics", stats2plot = args.stats2plot, up_buff = 0.08)

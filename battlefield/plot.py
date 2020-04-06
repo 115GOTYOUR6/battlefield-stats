@@ -1,7 +1,7 @@
 # File: plot.py
 # Author: Jay Oliver
 # Date Created: 29/03/2020
-# Last Modified: 3/04/2020
+# Last Modified: 6/04/2020
 # Purpose: Creates bar graphs displaying stats from the battlefield tracker
 #          website. Specifically the ouput of the scrub module in the
 #          battlefield package
@@ -35,6 +35,7 @@
 import matplotlib.pyplot as plt
 from re import sub
 from os import mkdir
+from math import ceil
 
 from battlefield import time_played
 
@@ -57,13 +58,37 @@ def stat_units(stat):
     }
     return switcher.get(stat, "")
 
-def s_c_limits(stats_dict, prof, stat):
+def zero_to_ten(val):
+    """Returns the given value if in the range of 0 to 10 otherwise these
+    boundary values are returned.
+
+    parameters:
+        - val: The number to check is in range 0 - 10 and return if it is
+    returns:
+        - ret:
+    raises
+    """
+    if val <= 0:
+        ret = 0
+    elif val >= 10:
+        ret = 10
+    else:
+        ret = val
+    return ret
+
+
+
+def s_c_limits(stats_dict, prof, stat, up_buff = None, low_buff = None):
     """Returns the highest and lowest values found in the s_c_dict provided.
 
     parameter:
         - stats_dict: The s_c_dict the min max values are wanted from
         - prof: The profile name the values are to be taken from as a string
         - stat: The stat the values are to be taken from as a string
+        - up_buff: A value indicating the amount of buffer desired as a
+                   percentage of on the max value
+        - low_buff: A value indicating the amount of buffer desired as a
+                    percentage of the minimum value
     returns:
         - s_min: The smallest value among those for a particular stat and
                  weapon class provided
@@ -78,6 +103,12 @@ def s_c_limits(stats_dict, prof, stat):
                 s_max = stats_dict[prof][stat][w_class][weap]
             if stats_dict[prof][stat][w_class][weap] < s_min:
                 s_min = stats_dict[prof][stat][w_class][weap]
+
+    if up_buff != None:
+        s_max = s_max + abs(s_max*up_buff)
+
+    if low_buff != None:
+        s_min = s_min - abs(s_min*low_buff)
 
     return s_min, s_max
 
@@ -264,7 +295,7 @@ def some_format(stats_list):
 
 
 
-def s_c_plot(stats_dict, dname, stats2plot=None):
+def s_c_plot(stats_dict, dname, stats2plot = None, up_buff = None):
     """Creates bar graphs from the data in the given dictionary.
 
     The data is that obtained from the s_c_format method in this module.
@@ -316,22 +347,56 @@ def s_c_plot(stats_dict, dname, stats2plot=None):
                 mkdir("{}/{}/{}".format(dname, prof, stat))
             except FileExistsError:
                 pass
-            y_min, y_max = s_c_limits(stats_dict, prof, stat)
+            if up_buff != None:
+                y_min, y_max = s_c_limits(stats_dict, prof, stat,
+                                          up_buff = up_buff)
+            else:
+                y_min, y_max = s_c_limits(stats_dict, prof, stat)
+
             for w_class in stats_dict[prof][stat].keys():
-                fig = plt.figure(figsize = (23, 14), facecolor = 'w')
-                weap_dict = stats_dict[prof][stat][w_class]
-                plt.bar([i for i in range(len(weap_dict.keys()))],
-                        [weap_dict[j] for j in weap_dict.keys()],
-                        tick_label = [k for k in weap_dict.keys()]
-                       )
-                plt.suptitle("{} {} for {}S".format(prof, stat, w_class),
-                            fontsize = 16
-                            )
-                plt.ylabel("{} {}".format(stat, stat_units(stat)))
-                plt.ylim(y_min, y_max)
-                plt.savefig("{}/{}/{}/{} {} for {}S"
-                           ".png".format(dname, prof, stat, prof, stat,
-                                         w_class),
-                           bbox_inches = "tight"
+                # define some variables to shorten lines
+                w_dict = stats_dict[prof][stat][w_class]
+                w_keys = [i for i in w_dict.keys()]
+                for pnum in range(ceil(len(w_keys)/10)):
+                    # define a couple more variables
+                    keys_to_plot = w_keys[pnum*10:
+                                          pnum*10 + zero_to_ten(len(w_keys)
+                                                                - pnum*10)]
+                    x = [i for i in range(zero_to_ten(len(keys_to_plot)))]
+                    y = [w_dict[j] for j in keys_to_plot]
+
+                    fig = plt.figure(figsize = (23, 14), facecolor = 'w')
+                    plt.bar(x, y,
+                            tick_label = [k for k in keys_to_plot]
                            )
-                plt.close(fig=None)
+                    plt.ylabel("{} {}".format(stat, stat_units(stat)))
+                    plt.ylim(y_min, y_max)
+                    for bar in x:
+                        plt.text(bar,
+                                 y[bar] + plt.ylim()[1]*0.01,
+                                 y[bar],
+                                 horizontalalignment="center"
+                                )
+                    if len(w_keys) > 10:
+                        plt.suptitle("{} {} for {}S {}".format(prof, stat,
+                                                               w_class,
+                                                               pnum+1),
+                                    fontsize = 16
+                                    )
+                        plt.savefig("{}/{}/{}/{} {} for {}S {}"
+                                    ".png".format(dname, prof, stat, prof,
+                                                  stat, w_class, pnum+1),
+                                    bbox_inches = "tight"
+                                   )
+
+                    else:
+                        plt.suptitle("{} {} for {}S".format(prof, stat,
+                                                            w_class),
+                                    fontsize = 16
+                                    )
+                        plt.savefig("{}/{}/{}/{} {} for {}S"
+                                    ".png".format(dname, prof, stat, prof, stat,
+                                                  w_class),
+                                    bbox_inches = "tight"
+                                   )
+                    plt.close(fig=None)
