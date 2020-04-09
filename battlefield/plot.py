@@ -1,7 +1,7 @@
 # File: plot.py
 # Author: Jay Oliver
 # Date Created: 29/03/2020
-# Last Modified: 8/04/2020
+# Last Modified: 9/04/2020
 # Purpose: Creates bar graphs displaying stats from the battlefield tracker
 #          website. Specifically the ouput of the scrub module in the
 #          battlefield package
@@ -459,11 +459,19 @@ def s_c_plot(stats_dict, dname, stats2plot = None, up_buff = None):
                     plt.ylabel("{} {}".format(stat, stat_units(stat)))
                     plt.ylim(y_min, y_max)
                     for bar in x:
-                        plt.text(bar,
-                                 y[bar] + plt.ylim()[1]*0.01,
-                                 y[bar],
-                                 horizontalalignment="center"
-                                )
+                        if isinstance(y[bar], float):
+                            plt.text(bar,
+                                    y[bar] + plt.ylim()[1]*0.01,
+                                     "{:.2f}".format(y[bar]),
+                                    horizontalalignment="center"
+                                    )
+                        else:
+                            plt.text(bar,
+                                    y[bar] + plt.ylim()[1]*0.01,
+                                    y[bar],
+                                    horizontalalignment="center"
+                                    )
+
                     if len(w_keys) > 10:
                         plt.suptitle("{} {} for {}S {}".format(prof, stat,
                                                                w_class,
@@ -519,6 +527,8 @@ def s_c_comp_plot(stats_dict, dname, stats2plot = None, up_buff = None):
         raise ValueError("The given s_c_dict does not have the supported"
                          " number of profiles present (2-4)."
                         )
+    # ensure that the dictionary has the same entries for each stat
+    s_c_fillout(stats_dict)
     try:
         mkdir(dname)
     except FileExistsError:
@@ -582,6 +592,19 @@ def s_c_comp_plot(stats_dict, dname, stats2plot = None, up_buff = None):
                             label = prof,
                             width = width/len(profs)
                            )
+                    for ind in range(len(x)):
+                        if isinstance(y[ind], float):
+                            plt.text(x[ind],
+                                    y[ind] + plt.ylim()[1]*0.01,
+                                     "{:.2f}".format(y[ind]),
+                                    horizontalalignment="center"
+                                    )
+                        else:
+                            plt.text(x[ind],
+                                    y[ind] + plt.ylim()[1]*0.01,
+                                    y[ind],
+                                    horizontalalignment="center"
+                                    )
 
                 plt.xticks(ticks = [i for i
                                     in range(zero_to_ten(len(weaps_to_plot)))],
@@ -589,13 +612,8 @@ def s_c_comp_plot(stats_dict, dname, stats2plot = None, up_buff = None):
                           )
                 plt.ylabel("{} {}".format(stat, stat_units(stat)))
                 plt.ylim(y_min, y_max)
-                # note properly implemented
-                #for bar in x:
-                #    plt.text(bar,
-                #             y[bar] + plt.ylim()[1]*0.01,
-                #             y[bar],
-                #             horizontalalignment="center"
-                #            )
+                plt.legend(loc = "upper right")
+
                 if len(w_keys) > 10:
                     plt.suptitle("{} {} for {}S {}".format(comp_pname, stat,
                                                           w_class,
