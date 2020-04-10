@@ -459,10 +459,17 @@ def s_c_plot(stats_dict, dname, stats2plot = None, up_buff = None):
                     plt.ylabel("{} {}".format(stat, stat_units(stat)))
                     plt.ylim(y_min, y_max)
                     for bar in x:
-                        if isinstance(y[bar], float):
+                        if isinstance(y[bar], float) and round(y[bar], 2) != 0:
                             plt.text(bar,
                                     y[bar] + plt.ylim()[1]*0.01,
-                                     "{:.2f}".format(y[bar]),
+                                    "{:.2f}".format(y[bar]),
+                                    horizontalalignment="center"
+                                    )
+                        elif (isinstance(y[bar], float)
+                              and round(y[bar], 2) == 0):
+                            plt.text(bar,
+                                    y[bar] + plt.ylim()[1]*0.01,
+                                    "0",
                                     horizontalalignment="center"
                                     )
                         else:
@@ -593,10 +600,17 @@ def s_c_comp_plot(stats_dict, dname, stats2plot = None, up_buff = None):
                             width = width/len(profs)
                            )
                     for ind in range(len(x)):
-                        if isinstance(y[ind], float):
+                        if isinstance(y[ind], float) and round(y[ind], 2) != 0:
                             plt.text(x[ind],
                                     y[ind] + plt.ylim()[1]*0.01,
-                                     "{:.2f}".format(y[ind]),
+                                    "{:.2f}".format(y[ind]),
+                                    horizontalalignment="center"
+                                    )
+                        elif (isinstance(y[ind], float)
+                              and round(y[ind], 2) == 0):
+                            plt.text(x[ind],
+                                    y[ind] + plt.ylim()[1]*0.01,
+                                    "0",
                                     horizontalalignment="center"
                                     )
                         else:
