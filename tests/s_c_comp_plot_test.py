@@ -186,6 +186,8 @@ s_c_dict = plot.s_c_form(rav, "Ravic")
 temp = plot.s_c_form(x, "115GOTYOUR6")
 s_c_dict.update(temp)
 
-plot.s_c_fillout(s_c_dict)
+plot.s_c_add_hpk(s_c_dict)
 
-plot.s_c_comp_plot(s_c_dict, "./tests/s_c_plot_pics", stats2plot = ['accuracy'])
+# plot.s_c_fillout(s_c_dict)
+
+plot.s_c_comp_plot(s_c_dict, "./tests/s_c_plot_pics", stats2plot=['kills'], up_buff=0.08)
