@@ -1,7 +1,7 @@
 # File: battlefield_stats.py 
 # Author: Jay Oliver
 # Date Created: 11/03/2020
-# Last Modified: 9/04/2020
+# Last Modified: 11/04/2020
 # Purpose: This script is a data visualization tool for the stats
 #          provided on the battlfield tracker website
 # Comments:
@@ -20,8 +20,7 @@ parser = argparse.ArgumentParser(description="This is a script that"
                                              " provides a visual"
                                              " comparison of stats"
                                              " provided on"
-                                             " battlefieldtracker.com"
-                                )
+                                             " battlefieldtracker.com")
 
 parser.add_argument("plotting",
                     help = ("The way in which the stats will appear on the"
@@ -29,18 +28,15 @@ parser.add_argument("plotting",
                             " profiles stats per figure or mult where all the"
                             " given profile stats appear on each figure. Note"
                             " that the latter mode only supports up to 4"
-                            " profiles."
-                           ),
+                            " profiles."),
                     type = str,
-                    choices = ["singular", "compare"]
-                   )
+                    choices = ["singular", "compare"])
 parser.add_argument("dir",
                     help = "The directory the figures will be saved to. Only"
                            " directories that require the creation of 1"
                            " folder will be accepted where the directory"
                            " currently doesn't exists",
-                    type =str
-                   )
+                    type =str)
 
 
 parser.add_argument("--stats2plot",
@@ -49,10 +45,8 @@ parser.add_argument("--stats2plot",
                     type = str,
                     nargs = '*',
                     choices = ["kills", "kpm", "time played", "shots fired",
-                               "shots hit", "accuracy", "headshots", "hpk"
-                              ],
-                    default = None
-                   )
+                               "shots hit", "accuracy", "headshots", "hpk"],
+                    default = None)
 
 
 requiredNamed = parser.add_argument_group("required named arguments")
@@ -61,9 +55,8 @@ requiredNamed.add_argument("--platform",
                            help = "The platform that the user account is on.",
                            type = str,
                            nargs = '+',
-                           choices=["origin", "xbox", "psn"],
-                           required = True
-                          )
+                           choices=["origin", "xbl", "psn"],
+                           required = True)
 
 requiredNamed.add_argument("--prof_name",
                            help = "The name of the battlefield account the"
@@ -72,22 +65,19 @@ requiredNamed.add_argument("--prof_name",
                                   " quotes.",
                            type = str,
                            nargs = '+',
-                           required = True
-                          )
+                           required = True)
 
 args = parser.parse_args()
 
 if len(args.prof_name) != len(args.platform):
     raise ValueError("The number of profiles specified does not match the"
                      " number of platforms specified, ensure that each profile"
-                     " has the platform they are on given also!"
-                    )
+                     " has the platform they are on given also!")
 
 if (args.plotting == "compare" and len(args.prof_name) > 4
-    or args.plotting == "compare" and len(args.prof_name) < 2):
-        raise ValueError("The number of profiles provided is not supported for"
-                         " compare mode, the range acceptable is 2-4"
-                        )
+        or args.plotting == "compare" and len(args.prof_name) < 2):
+    raise ValueError("The number of profiles provided is not supported for"
+                     " compare mode, the range acceptable is 2-4")
 
 
 # this is required as the plt.save method in the plot module has been written
@@ -108,13 +98,12 @@ if not isdir(args.dir):
         except FileNotFoundError:
             raise ValueError("The directory specifeid requires the"
                              " creation of more than 1 folder, specify a"
-                             " path that requires only 1 folder to be made"
-                            )
+                             " path that requires only 1 folder to be made")
 
 
 urls = [("https://battlefieldtracker.com/bfv/profile/{plat}/{prof}"
          "/weapons".format(plat = args.platform[i], prof = args.prof_name[i]))
-       for i in range(len(args.platform))]
+        for i in range(len(args.platform))]
 # the url is not expected to change so an option to specify it will not
 # be provided (its dice/EA we're taling bout here)
 pages = []
@@ -134,11 +123,12 @@ for url in urls:
         print("Redirection Error: {}".format(errr))
         sys.exit(1)
     except requests.exceptions.RequestException as err:
-        print ("Uknown Error: {}".format(err))
+        print("Uknown Error: {}".format(err))
         sys.exit(1)
 
     if (page.status_code != 200):
-        raise Exception ("Unknown Error: page status received was {}".format(page.status_code))
+        raise Exception("Unknown Error: page status received was {}"
+                        .format(page.status_code))
     pages.append(page)
 
 s_c_dict = {}
@@ -152,9 +142,7 @@ for i in range(len(args.prof_name)):
 plot.s_c_add_hpk(s_c_dict)
 if args.plotting == "singular":
     plot.s_c_plot(s_c_dict, args.dir, stats2plot = args.stats2plot,
-                  up_buff = 0.08
-                 )
+                  up_buff = 0.08)
 elif args.plotting == "compare":
     plot.s_c_comp_plot(s_c_dict, args.dir, stats2plot = args.stats2plot,
-                  up_buff = 0.08
-                 )
+                  up_buff = 0.08)
