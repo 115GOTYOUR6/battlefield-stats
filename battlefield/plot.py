@@ -1,7 +1,7 @@
 # File: plot.py
 # Author: Jay Oliver
 # Date Created: 29/03/2020
-# Last Modified: 11/04/2020
+# Last Modified: 14/04/2020
 # Purpose: Creates bar graphs displaying stats from the battlefield tracker
 #          website. Specifically the ouput of the scrub module in the
 #          battlefield package
@@ -39,6 +39,7 @@ from math import ceil
 
 from battlefield import time_played
 
+
 def stat_units(stat):
     """Returns the units for the provided stat.
 
@@ -57,6 +58,7 @@ def stat_units(stat):
         "hpk": "(headshot percentage)"}
     return switcher.get(stat, "")
 
+
 def zero_to_ten(val):
     """Returns the given value if in the range of 0 to 10 otherwise these
     boundary values are returned.
@@ -74,7 +76,6 @@ def zero_to_ten(val):
     else:
         ret = val
     return ret
-
 
 
 def s_c_limits(stats_dict, prof, stat, up_buff = None, low_buff = None):
@@ -181,6 +182,7 @@ def s_c_form(data, prof):
 
     return s_c_dict
 
+
 def s_c_fillout(s_c_dict):
     """Adds 0 to weapon entries that exist in other profiles.
 
@@ -222,6 +224,7 @@ def s_c_fillout(s_c_dict):
                 for weap in s_c_dict[mast_prof][stat][w_class].keys():
                     if weap not in s_c_dict[prof][stat][w_class].keys():
                         s_c_dict[prof][stat][w_class][weap] = 0
+
 
 def comp_plot_params(profs, width):
     """Color and position on x axis is assigned for each profile.
@@ -266,6 +269,7 @@ def comp_plot_params(profs, width):
         plot_params[profs[i]]["x_pos"] = x_pos[i]
 
     return plot_params
+
 
 def s_c_add_hpk(stats_dict):
     """Add headshots per kill stat to given s_c dict.
@@ -452,7 +456,7 @@ def s_c_plot(stats_dict, dname, stats2plot = None, up_buff = None):
                     for bar in x:
                         if isinstance(y[bar], float) and round(y[bar], 2) != 0:
                             plt.text(bar,
-                                    y[bar] + plt.ylim()[1]*0.01,
+                                     y[bar] + plt.ylim()[1]*0.01,
                                      "{:.2f}".format(y[bar]),
                                      horizontalalignment="center"
                                      )
@@ -483,11 +487,11 @@ def s_c_plot(stats_dict, dname, stats2plot = None, up_buff = None):
                                                             w_class),
                                      fontsize = 16)
                         plt.savefig("{}/{}/{}/{} {} for {}S"
-                                    ".png".format(dname, prof, stat, prof, stat,
-                                                  w_class),
-                                    bbox_inches = "tight"
-                                   )
+                                    ".png".format(dname, prof, stat, prof,
+                                                  stat, w_class),
+                                    bbox_inches = "tight")
                     plt.close(fig=None)
+
 
 def s_c_comp_plot(stats_dict, dname, stats2plot = None, up_buff = None):
     """Creates bar graphs from the data in the given dictionary.
@@ -577,7 +581,8 @@ def s_c_comp_plot(stats_dict, dname, stats2plot = None, up_buff = None):
                 for prof in profs:
                     x = [i + plot_params[prof]['x_pos']
                          for i in range(zero_to_ten(len(weaps_to_plot)))]
-                    y = [stats_dict[prof][stat][w_class][j] for j in weaps_to_plot]
+                    y = [stats_dict[prof][stat][w_class][j] for j
+                         in weaps_to_plot]
                     plt.bar(x, y,
                             color = plot_params[prof]['col'],
                             label = prof,
