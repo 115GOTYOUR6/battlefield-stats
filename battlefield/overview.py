@@ -1,7 +1,7 @@
 # File: overview.py
 # Author: Jay Oliver
 # Date Created: 14/04/2020
-# Date Last Modified: 17/04/2020
+# Date Last Modified: 21/04/2020
 # Purpose: Contains all methids relating to the creation and modifycation of
 #           overstat dictionaries for the battlefield_stats program
 # Comments:
@@ -35,7 +35,7 @@ def over_form(data, prof):
         ValueError: When an entry obtained from the list is not of the type
                     expected given the stat it is supposed to be for
     """
-    c_stats = ["rank", "score", "score/min", "kills", "kpm", "k/d"]
+    c_stats = ["rank", "score", "score/min", "kills", "kills/min", "k/d"]
 
     # these marks show where the entry for the top class occurs
     mark = min([data.index(i) for i
@@ -46,18 +46,22 @@ def over_form(data, prof):
                          " career stats not having a header.")
     over_dict = {}
     over_dict[prof] = {}
-    # store the carrer stats first
+    # store the carrer stats first, career stats all start with a capital
+    # hence casefold
     for i in range(int(len(data[:mark])/2)):
-        if data[i*2] not in over_dict[prof].keys():
-            over_dict[prof][data[i*2]] = {}
-        if data[i*2] in ["Win %", "K/D", "Kills/min", "Score/min"]:
-            over_dict[prof][data[i*2]]["career"] = float(data[i*2 + 1][:-1])
-        elif data[i*2] in ["Assists", "Damage", "Deaths", "Heals", "Kills",
-                           "Resupplies", "Revives", "Wins"]:
-            over_dict[prof][data[i*2]]["career"] = int(sub(",", "",
-                                                           data[i*2 + 1]))
+        if data[i*2].casefold() not in over_dict[prof].keys():
+            over_dict[prof][data[i*2].casefold()] = {}
+        if data[i*2].casefold() in ["win %", "k/d", "kills/min", "score/min"]:
+            over_dict[prof][data[i*2].casefold()]["Career"] = float(
+                data[i*2 + 1][:-1])
+        elif data[i*2].casefold() in ["assists", "damage", "deaths", "heals",
+                                      "kills", "resupplies", "revives",
+                                      "wins"]:
+            over_dict[prof][data[i*2].casefold()]["Career"] = int(
+                sub(",", "", data[i*2 + 1]))
         else:
-            over_dict[prof][data[i*2]]["career"] = int(data[i*2 + 1])
+            over_dict[prof][data[i*2].casefold()]["Career"] = int(
+                data[i*2 + 1])
     # mark + 1 will exclude the name of the top class so that the next class
     # reference can be found which should be the start of the class stats
     # entries
@@ -70,20 +74,51 @@ def over_form(data, prof):
                          " expected to be. This maybe because a stat was"
                          " added")
     for stat in c_stats:
-        over_dict[prof][stat] = {}
+        if stat not in over_dict[prof].keys():
+            over_dict[prof][stat] = {}
         for i in range(int(len(c_list)/c_size)):
             try:
-                if stat in ["score/min", "kpm", "k/d"]:
+                if stat in ["score/min", "kills/min", "k/d"]:
                     over_dict[prof][stat][c_list[i*c_size]] = (
-                        float(c_list[i*c_size + 1 + c_stats.index(stat)]))
+                        float(sub(",", "", c_list[i*c_size + 1
+                                                  + c_stats.index(stat)])))
                 elif stat in ["score", "kills"]:
                     over_dict[prof][stat][c_list[i*c_size]] = (
                         int(sub(",", "", c_list[i*c_size
                                                 + 1 + c_stats.index(stat)])))
                 else:
                     over_dict[prof][stat][c_list[i*c_size]] = (
-                        int(c_list[i*c_size + 1 + c_stats.index(stat)]))
+                        int(sub(",", "", c_list[i*c_size + 1
+                                                + c_stats.index(stat)])))
             except ValueError:
                 raise ValueError("One of the stats was not of the type"
                                  " expected.")
     return over_dict
+
+
+def over_limits(over_dict, prof, stat, up_buff = None, low_buff = None):
+    """Find the highest and lowest value for the given stat and profile.
+
+    parameters:
+        - over_dict: A dictionary containing information scrubbed from the
+                     overview page of the battlefield tracker website
+        - prof: a string representing the profile name the stats are for
+        - stat: a string, the stat the limits are to be found for
+    returns:
+        - s_min: the lowest stat value
+        - s_max: the largest stat value
+    """
+    s_min = 0
+    s_max = 0
+    for s_class in over_dict[prof][stat].keys():
+        if over_dict[prof][stat][s_class] > s_max:
+            s_max = over_dict[prof][stat][s_class]
+        if over_dict[prof][stat][s_class] < s_min:
+            s_min = over_dict[prof][stat][s_class]
+
+    if up_buff is not None:
+        s_max = s_max + abs(s_max*up_buff)
+    if low_buff is not None:
+        s_min = s_min - abs(s_min*low_buff)
+
+    return s_min, s_max

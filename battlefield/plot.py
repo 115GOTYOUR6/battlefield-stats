@@ -1,7 +1,7 @@
 # File: plot.py
 # Author: Jay Oliver
 # Date Created: 29/03/2020
-# Last Modified: 14/04/2020
+# Last Modified: 21/04/2020
 # Purpose: Creates bar graphs displaying stats from the battlefield tracker
 #          website. Specifically the ouput of the scrub module in the
 #          battlefield package
@@ -38,6 +38,7 @@ from os import mkdir
 from math import ceil
 
 from battlefield import time_played
+from battlefield import overview
 
 
 def stat_units(stat):
@@ -166,8 +167,8 @@ def s_c_form(data, prof):
             try:
                 if stat in ["kpm", "accuracy"]:
                     s_c_dict[prof][stat][data[i*ent + 1]][data[i*ent]] = (
-                        float(data[i*ent + 2 + stats.index(stat)])
-                    )
+                        float(sub(",", "", data[i*ent + 2
+                                                + stats.index(stat)])))
                 elif (stat
                         in ["kills", "shots fired", "shots hit", "headshots"]):
                     s_c_dict[prof][stat][data[i*ent + 1]][data[i*ent]] = (
@@ -322,64 +323,6 @@ def s_c_add_hpk(stats_dict):
                     stats_dict[prof]["hpk"][w_class][weap] = 0
 
 
-def some_format(stats_list):
-    """Incomplete function to convert the stats list to a dict.
-
-    Intended format is:
-        |profile name
-        -|weapon class
-        --|weapon name
-        ---|stat (such as kills, kpm etc.)
-        ----|value
-
-
-    """
-    stat_dict = {}
-    stat_dict[prof] = {}
-
-    if(len(data) % 9 != 0):
-        raise ValueError("The number of entries in the scrubbed data was not a"
-                         " multiple of 9. This may be the result of the"
-                         " webpage changing its format or an unforseen entry"
-                         " in a weapon stat field.")
-    else:
-        for i in range(int(len(data)/9)):
-            w_class = data[i*9 + 1]
-            w_name = data[i*9 + 0]
-            if(w_class not in stat_dict[prof].keys()):
-                stat_dict[prof][w_class] = {}
-            stat_dict[prof][w_class][w_name] = {}
-            try:
-                stat_dict[prof][w_class][w_name]["kills"] = (
-                    int(sub(",", "", data[i*9 + 2])))
-
-                stat_dict[prof][w_class][w_name]["kpm"] = (
-                    float(data[i*9 + 3]))
-
-                stat_dict[prof][w_class][w_name]["time played"] = (
-                    time_played.hours(data[i*9 + 4]))
-
-                stat_dict[prof][w_class][w_name]["shots fired"] = (
-                    int(sub(",", "", data[i*9 + 5])))
-
-                stat_dict[prof][w_class][w_name]["shots hit"] = (
-                    int(sub(",", "", data[i*9 + 6])))
-
-                stat_dict[prof][w_class][w_name]["accuracy"] = (
-                    float(data[i*9 + 7]))
-
-                stat_dict[prof][w_class][w_name]["headshots"] = (
-                    int(sub(",", "", data[i*9 + 8])))
-
-            except ValueError:
-                raise ValueError("One of the stats read in is not of the type"
-                                 " expected.")
-
-    return stat_dict
-
-
-
-
 def s_c_plot(stats_dict, dname, stats2plot = None, up_buff = None):
     """Creates bar graphs from the data in the given dictionary.
 
@@ -424,9 +367,13 @@ def s_c_plot(stats_dict, dname, stats2plot = None, up_buff = None):
             mkdir("{}/{}".format(dname, prof))
         except FileExistsError:
             pass
+        try:
+            mkdir("{}/{}/weapons".format(dname, prof))
+        except FileExistsError:
+            pass
         for stat in stats2plot:
             try:
-                mkdir("{}/{}/{}".format(dname, prof, stat))
+                mkdir("{}/{}/weapons/{}".format(dname, prof, stat))
             except FileExistsError:
                 pass
             if up_buff is not None:
@@ -477,7 +424,7 @@ def s_c_plot(stats_dict, dname, stats2plot = None, up_buff = None):
                                                                w_class,
                                                                pnum+1),
                                      fontsize = 16)
-                        plt.savefig("{}/{}/{}/{} {} for {}S {}"
+                        plt.savefig("{}/{}/weapons/{}/{} {} for {}S {}"
                                     ".png".format(dname, prof, stat, prof,
                                                   stat, w_class, pnum+1),
                                     bbox_inches = "tight")
@@ -486,7 +433,7 @@ def s_c_plot(stats_dict, dname, stats2plot = None, up_buff = None):
                         plt.suptitle("{} {} for {}S".format(prof, stat,
                                                             w_class),
                                      fontsize = 16)
-                        plt.savefig("{}/{}/{}/{} {} for {}S"
+                        plt.savefig("{}/{}/weapons/{}/{} {} for {}S"
                                     ".png".format(dname, prof, stat, prof,
                                                   stat, w_class),
                                     bbox_inches = "tight")
@@ -544,11 +491,16 @@ def s_c_comp_plot(stats_dict, dname, stats2plot = None, up_buff = None):
         mkdir("{}/{}".format(dname, comp_pname))
     except FileExistsError:
         pass
+    try:
+        mkdir("{}/{}/weapons".format(dname, comp_pname))
+    except FileExistsError:
+        pass
     for stat in stats2plot:
         try:
-            mkdir("{}/{}/{}".format(dname, comp_pname, stat))
+            mkdir("{}/{}/weapons/{}".format(dname, comp_pname, stat))
         except FileExistsError:
             pass
+        # these maybe configurable in future version
         width = 0.8
         plot_params = comp_plot_params(profs, width)
         y_min = 0
@@ -617,7 +569,7 @@ def s_c_comp_plot(stats_dict, dname, stats2plot = None, up_buff = None):
                                                            w_class,
                                                            pnum+1),
                                  fontsize = 16)
-                    plt.savefig("{}/{}/{}/{} {} for {}S {}"
+                    plt.savefig("{}/{}/weapons/{}/{} {} for {}S {}"
                                 ".png".format(dname,
                                               comp_pname, stat, stat,
                                               comp_pname, w_class, pnum+1),
@@ -627,8 +579,111 @@ def s_c_comp_plot(stats_dict, dname, stats2plot = None, up_buff = None):
                     plt.suptitle("{} {} for {}S".format(comp_pname, stat,
                                                         w_class),
                                  fontsize = 16)
-                    plt.savefig("{}/{}/{}/{} {} for {}S"
+                    plt.savefig("{}/{}/weapons/{}/{} {} for {}S"
                                 ".png".format(dname, comp_pname, stat,
                                               stat, comp_pname, w_class),
                                 bbox_inches = "tight")
                 plt.close(fig=None)
+
+
+def over_comp_plot(over_dict, dname, stats2plot = None, up_buff = None):
+    """Plots the data obtained by scrubbing the overview page.
+
+    """
+    if stats2plot is not None:
+        if not isinstance(stats2plot, list):
+            raise ValueError("The optional parameter stats2plot is not a"
+                             "list.")
+        for i in stats2plot:
+            if not isinstance(i, str):
+                raise ValueError("One or more of the elements of the"
+                                 " optional list stats2plot is not a string.")
+    if len(over_dict.keys()) > 4 or len(over_dict.keys()) < 2:
+        raise ValueError("The given over_dict does not have the supported"
+                         " number of profiles present (2-4).")
+    try:
+        mkdir(dname)
+    except FileExistsError:
+        pass
+    profs = list(over_dict.keys())
+    m_prof = profs[0]
+    comp_pname = " vs ".join(profs)
+    if stats2plot is None:
+        stats2plot = over_dict[m_prof].keys()
+    else:
+        for i in stats2plot:
+            if i not in over_dict[m_prof].keys():
+                raise ValueError("One of the specified stats to plot is"
+                                 " not present in the class stats for"
+                                 " {}".format(m_prof))
+    try:
+        mkdir("{}/{}".format(dname, comp_pname))
+    except FileExistsError:
+        pass
+    try:
+        mkdir("{}/{}/overview".format(dname, comp_pname))
+    except FileExistsError:
+        pass
+    # these maybe configurable in future version
+    width = 0.8
+    plot_params = comp_plot_params(profs, width)
+
+    for stat in stats2plot:
+        plt.figure(figsize = (23, 14), facecolor = 'w')
+        y_min = 0
+        y_max = 0
+        for prof in profs:
+            # find the limits
+            if up_buff is not None:
+                min_tem, max_tem = overview.over_limits(over_dict, prof,
+                                                        stat,
+                                                        up_buff = up_buff)
+                if y_min > min_tem:
+                    y_min = min_tem
+                if y_max < max_tem:
+                    y_max = max_tem
+            else:
+                min_tem, max_tem = overview.over_limits(over_dict, prof,
+                                                        stat)
+                if y_min > min_tem:
+                    y_min = min_tem
+                if y_max < max_tem:
+                    y_max = max_tem
+            x = [i + plot_params[prof]['x_pos']
+                 for i in range((len(over_dict[prof][stat].keys())))]
+            y = [over_dict[prof][stat][j] for j
+                 in over_dict[prof][stat].keys()]
+            plt.bar(x, y,
+                    color = plot_params[prof]['col'],
+                    label = prof,
+                    width = width/len(profs))
+            for ind in range(len(x)):
+                # add some numbers to plot
+                if isinstance(y[ind], float) and round(y[ind], 2) != 0:
+                    plt.text(x[ind],
+                             y[ind] + plt.ylim()[1]*0.01,
+                             "{:.2f}".format(y[ind]),
+                             horizontalalignment="center")
+                elif (isinstance(y[ind], float)
+                        and round(y[ind], 2) == 0):
+                    plt.text(x[ind],
+                             y[ind] + plt.ylim()[1]*0.01,
+                             "0",
+                             horizontalalignment="center")
+                else:
+                    plt.text(x[ind],
+                             y[ind] + plt.ylim()[1]*0.01,
+                             y[ind],
+                             horizontalalignment="center")
+        plt.xticks(ticks = [i for i
+                            in range((len(x)))],
+                   labels = [k for k in over_dict[prof][stat]])
+        plt.ylabel("{} {}".format(stat, stat_units(stat)))
+        plt.ylim(y_min, y_max)
+        plt.legend(loc = "upper right")
+        plt.suptitle("{} for {}".format(comp_pname, stat),
+                     fontsize = 16)
+        plt.savefig("{}/{}/overview/{} {}.png".format(dname, comp_pname,
+                                                      comp_pname,
+                                                      sub("/", "-", stat)),
+                    bbox_inches = "tight")

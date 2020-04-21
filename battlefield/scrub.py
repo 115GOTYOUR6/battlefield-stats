@@ -1,7 +1,7 @@
 # File: scrub.py
 # Author: Jay Oliver
 # Date Created: 13/03/2020
-# Last Modified: 14/04/2020
+# Last Modified: 21/04/2020
 # Purpose: This file contains all functions that relate to web page
 #          scrubbing
 # Comments: More than one scrubbing fuction maybe created so as to
@@ -71,10 +71,12 @@ def overview(page):
     bad_ent = ["Search Profile", "Search", "Home", "My Profile",
                "Leaderboards", "Challenges", "More", "Link Profile"]
     soup = BeautifulSoup(page.content, "html.parser")
-    parsed_soup = [str(i) for i in soup.find_all("span", ["name", "value"])]
+    parsed_soup = [str(i) for i in soup.find_all("span", ["name", "value",
+                                                          "playtime"])]
     data = [search(r">.*<", i).group(0)[1:-1]
             for i
             in parsed_soup
-            if search(r">.*<", i).group(0)[1:-1] not in bad_ent]
+            if search(r">.*<", i).group(0)[1:-1] not in bad_ent
+            and "viewbox" not in search(r">.*<", i).group(0)[1:-1]]
 
     return data

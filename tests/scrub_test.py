@@ -8,7 +8,7 @@ from requests import get
 from pprint import pprint
 from battlefield import scrub
 
-flag = 'weap'
+flag = 'over'
 
 if flag == 'weap':
     url = "https://battlefieldtracker.com/bfv/profile/origin/115GOTYOUR6/weapons"
