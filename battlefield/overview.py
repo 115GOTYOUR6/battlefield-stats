@@ -1,7 +1,7 @@
 # File: overview.py
 # Author: Jay Oliver
 # Date Created: 14/04/2020
-# Date Last Modified: 21/04/2020
+# Date Last Modified: 22/04/2020
 # Purpose: Contains all methids relating to the creation and modifycation of
 #           overstat dictionaries for the battlefield_stats program
 # Comments:
@@ -9,7 +9,7 @@
 from re import sub
 
 
-def over_form(data, prof):
+def create(data, prof):
     """Put the information obtained from the scub module into a dictionary.
 
     The parsed stats from the website given as data here from the scrub module
@@ -96,7 +96,7 @@ def over_form(data, prof):
     return over_dict
 
 
-def over_limits(over_dict, prof, stat, up_buff = None, low_buff = None):
+def stat_limits(over_dict, prof, stat, up_buff=None, low_buff=None):
     """Find the highest and lowest value for the given stat and profile.
 
     parameters:

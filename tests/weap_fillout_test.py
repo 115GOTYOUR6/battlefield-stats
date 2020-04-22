@@ -4,7 +4,7 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 
-from battlefield import plot
+from battlefield import weapons
 from pprint import pprint
 
 x = {}
@@ -28,7 +28,7 @@ x["sil"]["kills"]["ass"] = {}
 x["sil"]["kills"]["ass"]["sar"] = 943
 
 pprint(x)
-plot.s_c_fillout(x)
+weapons.fillout(x)
 print("------------------------------------------------")
 print("------------------------------------------------")
 print("------------------------------------------------")

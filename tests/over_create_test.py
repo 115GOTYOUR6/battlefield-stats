@@ -19,6 +19,6 @@ x = ['Score/min', '485.82', 'K/D', '3.55', 'Rank', '61', 'Win %', '48.9%',
      'Tanker', '0', '40,260', '694.14', '105', '1.81', '0.00', 'Pilot', '0',
      '0', '0.00', '0', '0.00', '0.00']
 
-o_dict = overview.over_form(x, "115GOTYOUR6")
+o_dict = overview.create(x, "115GOTYOUR6")
 
 pprint(o_dict)

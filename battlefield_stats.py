@@ -1,19 +1,20 @@
-# File: battlefield_stats.py 
+# File: battlefield_stats.py
 # Author: Jay Oliver
 # Date Created: 11/03/2020
-# Last Modified: 11/04/2020
+# Last Modified: 22/04/2020
 # Purpose: This script is a data visualization tool for the stats
 #          provided on the battlfield tracker website
 # Comments:
 #
 
-import argparse
-import requests
-import sys
 from os.path import isdir
 from os import mkdir
+import argparse
+import sys
+import requests
 
 from battlefield import scrub
+from battlefield import weapons
 from battlefield import plot
 
 parser = argparse.ArgumentParser(description="This is a script that"
@@ -23,49 +24,49 @@ parser = argparse.ArgumentParser(description="This is a script that"
                                              " battlefieldtracker.com")
 
 parser.add_argument("plotting",
-                    help = ("The way in which the stats will appear on the"
-                            " figures. This can be singular, a single"
-                            " profiles stats per figure or mult where all the"
-                            " given profile stats appear on each figure. Note"
-                            " that the latter mode only supports up to 4"
-                            " profiles."),
-                    type = str,
-                    choices = ["singular", "compare"])
+                    help=("The way in which the stats will appear on the"
+                          " figures. This can be singular, a single"
+                          " profiles stats per figure or mult where all the"
+                          " given profile stats appear on each figure. Note"
+                          " that the latter mode only supports up to 4"
+                          " profiles."),
+                    type=str,
+                    choices=["singular", "compare"])
 parser.add_argument("dir",
-                    help = "The directory the figures will be saved to. Only"
-                           " directories that require the creation of 1"
-                           " folder will be accepted where the directory"
-                           " currently doesn't exists",
-                    type =str)
+                    help="The directory the figures will be saved to. Only"
+                         " directories that require the creation of 1"
+                         " folder will be accepted where the directory"
+                         " currently doesn't exists",
+                    type=str)
 
 
 parser.add_argument("--stats2plot",
-                    help = "The stats that user wants figures for. If nothing"
-                           " is given all the stats retrieved will be plotted",
-                    type = str,
-                    nargs = '*',
-                    choices = ["kills", "kpm", "time played", "shots fired",
-                               "shots hit", "accuracy", "headshots", "hpk"],
-                    default = None)
+                    help="The stats that user wants figures for. If nothing"
+                         " is given all the stats retrieved will be plotted",
+                    type=str,
+                    nargs='*',
+                    choices=["kills", "kpm", "time played", "shots fired",
+                             "shots hit", "accuracy", "headshots", "hpk"],
+                    default=None)
 
 
 requiredNamed = parser.add_argument_group("required named arguments")
 
 requiredNamed.add_argument("--platform",
-                           help = "The platform that the user account is on.",
-                           type = str,
-                           nargs = '+',
+                           help="The platform that the user account is on.",
+                           type=str,
+                           nargs='+',
                            choices=["origin", "xbl", "psn"],
-                           required = True)
+                           required=True)
 
 requiredNamed.add_argument("--prof_name",
-                           help = "The name of the battlefield account the"
-                                  " stats are for. NOTE to enter a name that"
-                                  " has space in it surround it with double"
-                                  " quotes.",
-                           type = str,
-                           nargs = '+',
-                           required = True)
+                           help="The name of the battlefield account the"
+                                " stats are for. NOTE to enter a name that"
+                                " has space in it surround it with double"
+                                " quotes.",
+                           type=str,
+                           nargs='+',
+                           required=True)
 
 args = parser.parse_args()
 
@@ -89,7 +90,7 @@ if not isdir(args.dir):
     opt = 'blabla'
     while opt not in ['y', 'n', 'q']:
         opt = input("y/n/q ")
-    if opt == 'q' or opt == 'n':
+    if opt in ('n', 'q'):
         print("exiting")
         sys.exit(1)
     if opt == 'y':
@@ -126,7 +127,7 @@ for url in urls:
         print("Uknown Error: {}".format(err))
         sys.exit(1)
 
-    if (page.status_code != 200):
+    if page.status_code != 200:
         raise Exception("Unknown Error: page status received was {}"
                         .format(page.status_code))
     pages.append(page)
@@ -134,15 +135,15 @@ for url in urls:
 s_c_dict = {}
 for i in range(len(args.prof_name)):
     weapon_list = scrub.weaps(pages[i])
-    temp = plot.s_c_form(weapon_list, args.prof_name[i])
+    temp = weapons.create(weapon_list, args.prof_name[i])
     s_c_dict.update(temp)
 
 # adding the hpk (heashots per kill) stat to the dict as this should be on
 # the battlefiled stats page to begin with
-plot.s_c_add_hpk(s_c_dict)
+weapons.add_hpk(s_c_dict)
 if args.plotting == "singular":
-    plot.s_c_plot(s_c_dict, args.dir, stats2plot = args.stats2plot,
-                  up_buff = 0.08)
+    plot.weap_plot(s_c_dict, args.dir, stats2plot=args.stats2plot,
+                   up_buff=0.08)
 elif args.plotting == "compare":
-    plot.s_c_comp_plot(s_c_dict, args.dir, stats2plot = args.stats2plot,
-                  up_buff = 0.08)
+    plot.weap_comp_plot(s_c_dict, args.dir, stats2plot=args.stats2plot,
+                        up_buff=0.08)

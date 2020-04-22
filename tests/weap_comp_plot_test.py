@@ -5,6 +5,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 
 from battlefield import plot
+from battlefield import weapons
 from pprint import pprint
 
 rav = ['Turner SMLE', 'SEMI-AUTO RIFLE', '7,234', '1.52', '3d 07h 14m', '75,900', '23,189', '30.55', '1,815',
@@ -182,12 +183,11 @@ x = ['Lewis Gun', 'LMG', '774', '1.49', '8h 41m 25s', '22,848', '4,478', '19.60'
 'Scout Knife M1916', 'MELEE', '0', '0.00', '10s', '16', '0', '0.00', '0',
 'Lunge Mine', 'GADGET', '0', '0.00', '10s', '0', '0', '0.00', '0']
 
-s_c_dict = plot.s_c_form(rav, "Ravic")
-temp = plot.s_c_form(x, "115GOTYOUR6")
+s_c_dict = weapons.create(rav, "Ravic")
+temp = weapons.create(x, "115GOTYOUR6")
 s_c_dict.update(temp)
 
-plot.s_c_add_hpk(s_c_dict)
+weapons.add_hpk(s_c_dict)
 
-# plot.s_c_fillout(s_c_dict)
 
-plot.s_c_comp_plot(s_c_dict, "./tests/s_c_plot_pics", stats2plot=['kills'], up_buff=0.08)
+plot.weap_comp_plot(s_c_dict, "./tests/s_c_plot_pics", stats2plot=['kills'], up_buff=0.08)

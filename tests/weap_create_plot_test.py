@@ -4,6 +4,7 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 
+from battlefield import weapons
 from battlefield import plot
 from pprint import pprint
 import argparse
@@ -13,7 +14,7 @@ parser = argparse.ArgumentParser(description="This is a test")
 parser.add_argument("test",
                     help = "The scripts that need testing",
                     type = str,
-                    choices = ["s_c_format", "s_c_plot"]
+                    choices = ["create", "weap_plot"]
                    )
 parser.add_argument("--stats2plot",
                     help = "The stats to plot",
@@ -94,10 +95,10 @@ x = ['Lewis Gun', 'LMG', '774', '1.49', '8h 41m 25s', '22,848', '4,478', '19.60'
 'Scout Knife M1916', 'MELEE', '0', '0.00', '10s', '16', '0', '0.00', '0',
 'Lunge Mine', 'GADGET', '0', '0.00', '10s', '0', '0', '0.00', '0']
 
-s_c_dict = plot.s_c_form(x, "115GOTYOUR6")
-plot.s_c_add_hpk(s_c_dict)
-if args.test == "s_c_format":
+s_c_dict = weapons.create(x, "115GOTYOUR6")
+weapons.add_hpk(s_c_dict)
+if args.test == "create":
     pprint(s_c_dict)
 
-elif args.test == "s_c_plot":
-    plot.s_c_plot(s_c_dict, "./tests/s_c_plot_pics", stats2plot = args.stats2plot, up_buff = 0.08)
+elif args.test == "weap_plot":
+    plot.weap_plot(s_c_dict, "./tests/s_c_plot_pics", stats2plot = args.stats2plot, up_buff = 0.08)
