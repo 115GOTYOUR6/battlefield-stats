@@ -408,6 +408,7 @@ def over_comp_plot(over_dict, dname, stats2plot=None, up_buff=None):
         plt.figure(figsize=(23, 14), facecolor='w')
         y_min = 0
         y_max = 0
+        s_class_keys = over_dict[m_prof][stat].keys()
         for prof in profs:
             # find the limits
             if up_buff is not None:
@@ -428,7 +429,7 @@ def over_comp_plot(over_dict, dname, stats2plot=None, up_buff=None):
             x = [i + plot_params[prof]['x_pos']
                  for i in range((len(over_dict[prof][stat].keys())))]
             y = [over_dict[prof][stat][j] for j
-                 in over_dict[prof][stat].keys()]
+                 in s_class_keys]
             plt.bar(x, y,
                     color=plot_params[prof]['col'],
                     label=prof,
@@ -452,7 +453,7 @@ def over_comp_plot(over_dict, dname, stats2plot=None, up_buff=None):
                              y[ind],
                              horizontalalignment="center")
         plt.xticks(ticks=range((len(x))),
-                   labels=over_dict[prof][stat])
+                   labels=s_class_keys)
         plt.ylabel("{} {}".format(stat, stat_units(stat)))
         plt.ylim(y_min, y_max)
         plt.legend(loc="upper right")
