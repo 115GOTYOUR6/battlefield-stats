@@ -1,7 +1,7 @@
 # File: plot.py
 # Author: Jay Oliver
 # Date Created: 29/03/2020
-# Last Modified: 22/04/2020
+# Last Modified: 03/05/2020
 # Purpose: Creates bar graphs displaying stats from the battlefield tracker
 #          website.
 #
@@ -365,6 +365,18 @@ def weap_comp_plot(stats_dict, dname, stats2plot=None, up_buff=None):
 def over_comp_plot(over_dict, dname, stats2plot=None, up_buff=None):
     """Plots the data obtained by scrubbing the overview page.
 
+    parameters:
+        - over_dict: The dictionary containing the data to be plotted
+        - dname: The name of the directory the created figures are to
+                 be saved to
+        - stats2plot: The stats that figures are to be made for
+        - up_buff: A buffer as a percentage of the highest value for each stat,
+                   this is used to set the y axis max value so that the top
+                   of the figure is above the highest bar, thus leaving space
+                   for the numbers above the bars
+    raises:
+        ValueError: When a parameter or a value contained within one is not
+                    of the desired type
     """
     if stats2plot is not None:
         if not isinstance(stats2plot, list):

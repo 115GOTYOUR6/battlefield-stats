@@ -143,7 +143,8 @@ if not isdir(args.dir):
 urls = [("https://battlefieldtracker.com/bfv/profile/{plat}/{prof}"
          "/{page}".format(plat=args.platform[i], prof=args.prof_name[i],
                           page=args.page))
-        for i in range(len(args.platform))]# the url is not expected to change so an option to specify it will not
+        for i in range(len(args.platform))]
+# the url is not expected to change so an option to specify it will not
 # be provided (its dice/EA we're taling bout here)
 pages = []
 for url in urls:
