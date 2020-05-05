@@ -9,7 +9,6 @@
 #
 
 from re import sub
-from os import mkdir
 from math import ceil
 import matplotlib.pyplot as plt
 
@@ -139,7 +138,7 @@ def weap_plot(stats_dict, dname, stats2plot=None, up_buff=None):
 
         path = "{}/{}/weapons".format(dname, prof)
         for stat in stats2plot:
-            dirs.create_pwd("{}/{}".format(path, stat))
+            dirs.create_dir("{}/{}".format(path, stat))
             if up_buff is not None:
                 y_min, y_max = weapons.stat_limits(stats_dict, prof, stat,
                                                    up_buff=up_buff)
@@ -249,7 +248,7 @@ def weap_comp_plot(stats_dict, dname, stats2plot=None, up_buff=None):
         dname = dname[:-1:]
     path = "{}/{}/weapons".format(dname, comp_pname)
     for stat in stats2plot:
-        dirs.create_pwd("{}/{}".format(path, stat))
+        dirs.create_dir("{}/{}".format(path, stat))
         # these maybe configurable in future version
         width = 0.8
         plot_params = comp_plot_params(profs, width)
@@ -361,19 +360,20 @@ def over_comp_plot(over_dict, dname, stats2plot=None, up_buff=None):
     if len(over_dict.keys()) > 4 or len(over_dict.keys()) < 2:
         raise ValueError("The given over_dict does not have the supported"
                          " number of profiles present (2-4).")
+
     profs = sorted(list(over_dict.keys()))
     m_prof = profs[0]
     if dname[-1] == "/":
         dname = dname[:-1:]
     comp_pname = " vs ".join(profs)
     path = dname + "/" + comp_pname + "/" + "overview"
-    files = dirs.create_pwd(path)
+    files = dirs.create_dir(path)
     if stats2plot is None:
         stats2plot = over_dict[m_prof].keys()
     else:
         for i in stats2plot:
             if i not in over_dict[m_prof].keys():
-                dirs.remove_pwd(files)
+                dirs.remove_dir(files)
                 raise ValueError("One of the specified stats to plot is"
                                  " not present in the class stats for"
                                  " {}".format(m_prof))

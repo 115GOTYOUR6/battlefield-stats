@@ -1,7 +1,7 @@
 # File: overview.py
 # Author: Jay Oliver
 # Date Created: 14/04/2020
-# Date Last Modified: 22/04/2020
+# Date Last Modified: 05/05/2020
 # Purpose: Contains all methids relating to the creation and modifycation of
 #           overstat dictionaries for the battlefield_stats program
 # Comments:
@@ -28,8 +28,8 @@ def create(data, prof):
         - overstat_dict: A dictionary containing the stats from the list
                          organised like so:
                              |profile name
-                             -|soldier class
-                             --|stat
+                             -|stat
+                             --|soldier class
                              ---|value
     raises:
         ValueError: When an entry obtained from the list is not of the type
@@ -94,6 +94,35 @@ def create(data, prof):
                 raise ValueError("One of the stats was not of the type"
                                  " expected.")
     return over_dict
+
+
+def copy(over_dict, classes=None):
+    """Creates a copy of a overview dictionary.
+
+    parameters:
+        - over_dict: The overview dictionary that is to be copied
+        - classes: The soldier classes that are to be included. If this is
+                   left empty an exact copy is returned
+    returns:
+        - copy_dict: The copy of over_dict only containing the specified
+                     soldier classes
+    """
+    if classes is None:
+        classes = []
+    copy_dict = {}
+    for prof in over_dict.keys():
+        for stat in over_dict[prof].keys():
+            for s_class in over_dict[prof][stat].keys():
+                if s_class in classes or len(classes) == 0:
+                    if prof not in copy_dict.keys():
+                        copy_dict[prof] = {}
+                    if stat not in copy_dict[prof].keys():
+                        copy_dict[prof][stat] = {}
+                    copy_dict[prof][stat][s_class] = (over_dict[prof][stat]
+                                                      [s_class])
+                else:
+                    pass
+    return copy_dict
 
 
 def stat_limits(over_dict, prof, stat, up_buff=None, low_buff=None):

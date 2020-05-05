@@ -1,7 +1,7 @@
 # File: battlefield_stats.py
 # Author: Jay Oliver
 # Date Created: 11/03/2020
-# Last Modified: 22/04/2020
+# Last Modified: 05/05/2020
 # Purpose: This script is a data visualization tool for the stats
 #          provided on the battlfield tracker website
 # Comments:
@@ -69,6 +69,15 @@ parser.add_argument("--overview_stats",
                     type=str,
                     nargs='*',
                     choices=OVER_STATS,
+                    default=None)
+
+parser.add_argument("--overview_classes",
+                    help="The soldier classes that are to be included for"
+                         " the overview stat plots. NOTE that existing plots"
+                         " with the same profiles will be overwritten",
+                    type=str,
+                    nargs='*',
+                    choices=["Career", "Assault", "Support", "Medic", "Recon"],
                     default=None)
 
 requiredNamed = parser.add_argument_group("required named arguments")
@@ -197,7 +206,12 @@ else:
     if args.plotting == "singular":
         pass
     elif args.plotting == "compare":
-        plot.over_comp_plot(over_dict, args.dir,
-                            stats2plot=args.overview_stats, up_buff=0.08)
+        if args.overview_classes is None:
+            plot.over_comp_plot(over_dict, args.dir,
+                                stats2plot=args.overview_stats, up_buff=0.08)
+        else:
+            copy_dict = overview.copy(over_dict, args.overview_classes)
+            plot.over_comp_plot(copy_dict, args.dir,
+                                stats2plot=args.overview_stats, up_buff=0.08)
     else:
         raise ValueError("A plotting class was not selected.")
