@@ -1,7 +1,7 @@
 # File: plot.py
 # Author: Jay Oliver
 # Date Created: 29/03/2020
-# Last Modified: 03/05/2020
+# Last Modified: 05/05/2020
 # Purpose: Creates bar graphs displaying stats from the battlefield tracker
 #          website.
 #
@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 
 from battlefield import overview
 from battlefield import weapons
+from battlefield import directories as dirs
 
 
 def stat_units(stat):
@@ -120,16 +121,11 @@ def weap_plot(stats_dict, dname, stats2plot=None, up_buff=None):
     if stats2plot is not None:
         if not isinstance(stats2plot, list):
             raise ValueError("The optional parameter stats2plot is not a"
-                             "list."
-                             )
+                             "list.")
         for i in stats2plot:
             if not isinstance(i, str):
                 raise ValueError("One or more of the elements of the"
                                  " optional list stats2plot is not a string.")
-    try:
-        mkdir(dname)
-    except FileExistsError:
-        pass
 
     for prof in stats_dict.keys():
         if stats2plot is None:
@@ -140,19 +136,10 @@ def weap_plot(stats_dict, dname, stats2plot=None, up_buff=None):
                     raise ValueError("One of the specified stats to plot is"
                                      " not present in the weapon stats for"
                                      " {}".format(prof))
-        try:
-            mkdir("{}/{}".format(dname, prof))
-        except FileExistsError:
-            pass
-        try:
-            mkdir("{}/{}/weapons".format(dname, prof))
-        except FileExistsError:
-            pass
+
+        path = "{}/{}/weapons".format(dname, prof)
         for stat in stats2plot:
-            try:
-                mkdir("{}/{}/weapons/{}".format(dname, prof, stat))
-            except FileExistsError:
-                pass
+            dirs.create_pwd("{}/{}".format(path, stat))
             if up_buff is not None:
                 y_min, y_max = weapons.stat_limits(stats_dict, prof, stat,
                                                    up_buff=up_buff)
@@ -201,8 +188,8 @@ def weap_plot(stats_dict, dname, stats2plot=None, up_buff=None):
                                                                w_class,
                                                                pnum+1),
                                      fontsize=16)
-                        plt.savefig("{}/{}/weapons/{}/{} {} for {}S {}"
-                                    ".png".format(dname, prof, stat, prof,
+                        plt.savefig("{}/{}/{} {} for {}S {}"
+                                    ".png".format(path, stat, prof,
                                                   stat, w_class, pnum+1),
                                     bbox_inches="tight")
 
@@ -210,8 +197,8 @@ def weap_plot(stats_dict, dname, stats2plot=None, up_buff=None):
                         plt.suptitle("{} {} for {}S".format(prof, stat,
                                                             w_class),
                                      fontsize=16)
-                        plt.savefig("{}/{}/weapons/{}/{} {} for {}S"
-                                    ".png".format(dname, prof, stat, prof,
+                        plt.savefig("{}/{}/{} {} for {}S"
+                                    ".png".format(path, stat, prof,
                                                   stat, w_class),
                                     bbox_inches="tight")
                     plt.close(fig=None)
@@ -237,22 +224,16 @@ def weap_comp_plot(stats_dict, dname, stats2plot=None, up_buff=None):
     if stats2plot is not None:
         if not isinstance(stats2plot, list):
             raise ValueError("The optional parameter stats2plot is not a"
-                             "list."
-                             )
+                             "list.")
         for i in stats2plot:
             if not isinstance(i, str):
                 raise ValueError("One or more of the elements of the"
-                                 " optional list stats2plot is not a string."
-                                 )
+                                 " optional list stats2plot is not a string.")
     if len(stats_dict.keys()) > 4 or len(stats_dict.keys()) < 2:
         raise ValueError("The given s_c_dict does not have the supported"
                          " number of profiles present (2-4).")
     # ensure that the dictionary has the same entries for each stat
     weapons.fillout(stats_dict)
-    try:
-        mkdir(dname)
-    except FileExistsError:
-        pass
     profs = sorted(list(stats_dict.keys()))
     m_prof = profs[0]
     comp_pname = " vs ".join(profs)
@@ -264,19 +245,11 @@ def weap_comp_plot(stats_dict, dname, stats2plot=None, up_buff=None):
                 raise ValueError("One of the specified stats to plot is"
                                  " not present in the weapon stats for"
                                  " {}".format(m_prof))
-    try:
-        mkdir("{}/{}".format(dname, comp_pname))
-    except FileExistsError:
-        pass
-    try:
-        mkdir("{}/{}/weapons".format(dname, comp_pname))
-    except FileExistsError:
-        pass
+    if dname[-1] == "/":
+        dname = dname[:-1:]
+    path = "{}/{}/weapons".format(dname, comp_pname)
     for stat in stats2plot:
-        try:
-            mkdir("{}/{}/weapons/{}".format(dname, comp_pname, stat))
-        except FileExistsError:
-            pass
+        dirs.create_pwd("{}/{}".format(path, stat))
         # these maybe configurable in future version
         width = 0.8
         plot_params = comp_plot_params(profs, width)
@@ -345,19 +318,18 @@ def weap_comp_plot(stats_dict, dname, stats2plot=None, up_buff=None):
                                                            w_class,
                                                            pnum+1),
                                  fontsize=16)
-                    plt.savefig("{}/{}/weapons/{}/{} {} for {}S {}"
-                                ".png".format(dname,
-                                              comp_pname, stat, stat,
-                                              comp_pname, w_class, pnum+1),
+                    plt.savefig("{}/{}/{} {} for {}S {}"
+                                ".png".format(path, stat, stat, comp_pname,
+                                              w_class, pnum+1),
                                 bbox_inches="tight")
 
                 else:
                     plt.suptitle("{} {} for {}S".format(comp_pname, stat,
                                                         w_class),
                                  fontsize=16)
-                    plt.savefig("{}/{}/weapons/{}/{} {} for {}S"
-                                ".png".format(dname, comp_pname, stat,
-                                              stat, comp_pname, w_class),
+                    plt.savefig("{}/{}/{} {} for {}S"
+                                ".png".format(path, stat, stat, comp_pname,
+                                              w_class),
                                 bbox_inches="tight")
                 plt.close(fig=None)
 
@@ -389,29 +361,22 @@ def over_comp_plot(over_dict, dname, stats2plot=None, up_buff=None):
     if len(over_dict.keys()) > 4 or len(over_dict.keys()) < 2:
         raise ValueError("The given over_dict does not have the supported"
                          " number of profiles present (2-4).")
-    try:
-        mkdir(dname)
-    except FileExistsError:
-        pass
     profs = sorted(list(over_dict.keys()))
     m_prof = profs[0]
+    if dname[-1] == "/":
+        dname = dname[:-1:]
     comp_pname = " vs ".join(profs)
+    path = dname + "/" + comp_pname + "/" + "overview"
+    files = dirs.create_pwd(path)
     if stats2plot is None:
         stats2plot = over_dict[m_prof].keys()
     else:
         for i in stats2plot:
             if i not in over_dict[m_prof].keys():
+                dirs.remove_pwd(files)
                 raise ValueError("One of the specified stats to plot is"
                                  " not present in the class stats for"
                                  " {}".format(m_prof))
-    try:
-        mkdir("{}/{}".format(dname, comp_pname))
-    except FileExistsError:
-        pass
-    try:
-        mkdir("{}/{}/overview".format(dname, comp_pname))
-    except FileExistsError:
-        pass
     # these maybe configurable in future version
     width = 0.8
     plot_params = comp_plot_params(profs, width)
@@ -471,7 +436,6 @@ def over_comp_plot(over_dict, dname, stats2plot=None, up_buff=None):
         plt.legend(loc="upper right")
         plt.suptitle("{} for {}".format(comp_pname, stat),
                      fontsize=16)
-        plt.savefig("{}/{}/overview/{} {}.png".format(dname, comp_pname,
-                                                      comp_pname,
-                                                      sub("/", "-", stat)),
+        plt.savefig("{}/{} {}.png".format(path, comp_pname,
+                                          sub("/", "-", stat)),
                     bbox_inches="tight")
