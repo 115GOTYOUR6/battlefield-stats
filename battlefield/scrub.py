@@ -48,7 +48,7 @@ def weaps(page):
                "Leaderboards", "Challenges", "More", "Link Profile",
                "Score/min", "K/D", "Rank", "Win %", "Kills",
                "Kills/min", "Time Played", "Shots Fired", "Shots Hit",
-               "Shots Accuracy", "Headshots", "--"]
+               "Shots Accuracy", "Headshots", "--", "Premium"]
     soup = BeautifulSoup(page.content, "html.parser")
     parsed_soup = [str(i) for i in soup.find_all("span", ["name", "sub"])]
     data = [search(r">.*<", i).group(0)[1:-1]
@@ -69,7 +69,7 @@ def overview(page):
             - data: a list containing the parsed data from the html
     """
     bad_ent = ["Search Profile", "Search", "Home", "My Profile",
-               "Leaderboards", "Challenges", "More", "Link Profile"]
+               "Leaderboards", "Challenges", "More", "Link Profile", "Premium"]
     soup = BeautifulSoup(page.content, "html.parser")
     parsed_soup = [str(i) for i in soup.find_all("span", ["name", "value",
                                                           "playtime"])]
